@@ -1,13 +1,17 @@
 const Discord = require('discord.js');
 const querystring = require('querystring');
-const token = 'NzI5Njk2MTc0MjAxODk3MDEy.XwMsnQ.lTNnMqA3WDWmz0n0LSDyMt05WwA';
 const fetch = require('node-fetch');
 //lightweight module that brings fetch to api/ using to grap api data in node
 const client = new Discord.Client();
 const prefix = '!';
-
+const token = process.env.DISCORD_TOKEN;
 const trim = (str, max) => ((str.length > max) ? `${str.slice(0, max - 3)}...` : str);
+require('dotenv-flow').config();
 
+const config = {
+    token: process.env.DISCORD_TOKEN
+};
+  
 
 
 client.once('ready', () => {
@@ -21,7 +25,10 @@ client.on('message', async message => {
     const command = args.shift().toLowerCase();
     
     //random cat picture command
-    if (command === 'cat') {
+     if (command === 'help') {
+        message.channel.send('try (cat) or (urban)')
+    }
+    else if (command === 'cat') {
         //send get request to random.cat
         //get random file from database back as json object containing link to the image
         //node fetch recieves the response and deserialisez it with response.json()
@@ -36,16 +43,19 @@ client.on('message', async message => {
         return message.channel.send('You need to supply a search term!');
     }
 
+
     const query = querystring.stringify({ term: args.join(' ') });
-
+//fetch urban api with query of command entered
     const { list } = await fetch(`https://api.urbandictionary.com/v0/define?${query}`).then(response => response.json());
-
+//if no results return no results
     if (!list.length) {
         return message.channel.send(`No results found for **${args.join(' ')}**.`);
     }
 
     const [answer] = list;
 
+
+    //Styling for embeded message
     const embed = new Discord.MessageEmbed()
         .setColor('#EFFF00')
         .setTitle(answer.word)
@@ -57,11 +67,13 @@ client.on('message', async message => {
         );
     message.channel.send(embed);
 }
+
+
 });
 
 
 
 
-client.login(token);
+client.login(config.token);
 
 
